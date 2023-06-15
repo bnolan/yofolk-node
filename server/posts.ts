@@ -1,9 +1,8 @@
 import { Pool } from 'pg'
 
-const pool = new Pool({
-  database: 'yofolk-prod',
-  port: 5432
-});
+const connectionString = process.env.DATABASE_URL || "postgres://localhost/yofolk-prod"
+
+const pool = new Pool({ connectionString });
 
 type Wallet = string
 type UUID = string
