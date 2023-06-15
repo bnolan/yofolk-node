@@ -1,0 +1,20 @@
+@import url('https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@300;500&display=swap');
+
+header{
+
+}
+
+body{
+  font-family: 'Source Code Pro', monospace;
+  color: #030303;
+  background: #fafafa;
+}
+
+section{
+  max-width: 60rem;
+  margin: 0 auto;
+
+  .id{
+    /* color: red; */
+  }
+}
