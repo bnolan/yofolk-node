@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@300;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@400;800&display=swap');
 
 header{
 
@@ -6,8 +6,13 @@ header{
 
 body{
   font-family: 'Source Code Pro', monospace;
+  font-size: 0.9rem;
   color: #030303;
   background: #fafafa;
+}
+
+input,select,textarea,button{
+  font: inherit;
 }
 
 section{
@@ -17,4 +22,8 @@ section{
   .id{
     /* color: red; */
   }
+}
+
+a{
+  color: #333;
 }

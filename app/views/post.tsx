@@ -1,11 +1,11 @@
-import { h } from 'preact';
+import { Header } from "./header"
 
-interface CommentRecord {
+export interface CommentRecord {
   id: string
   comment: string
 }
 
-interface PostRecord {
+export interface PostRecord {
   id: string
   content: string
   user_id: string
@@ -32,22 +32,13 @@ interface PostProps {
   post: PostRecord
 }
 
-function Header () {
-  return (
-    <header>
-      <a href="/">Home</a> |
-      <a href="/p">Posts</a>
-    </header>
-
-  )
-}
 export default function Post (props: PostProps) {
   let { post } = props
 
-  console.log(post)
-
   let comments = post.comments?.map(c => <Comment comment={c} />)
 
+  let newCommentUrl = `/p/${post.id}/c`
+ 
   return (
     <section>
       <Header />
@@ -57,6 +48,11 @@ export default function Post (props: PostProps) {
       <cite>{post.content}</cite>
 
       { comments }
+
+      <form action={newCommentUrl} method="post">
+        <textarea name="comment" />
+        <input type="submit" value="Post" />
+      </form>
     </section>
   )
 }
