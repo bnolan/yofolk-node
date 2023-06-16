@@ -1,9 +1,11 @@
 {
   "dependencies": {
     "express": "^4.18.2",
+    "jazzicon": "^1.5.0",
     "pg": "^8.11.0",
     "postgres": "^3.3.5",
     "preact": "^10.15.1",
+    "preact-custom-element": "^4.2.1",
     "preact-render-to-string": "^6.1.0",
     "ts-node": "^10.9.1"
   },
@@ -15,8 +17,10 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "dev": "ts-node-dev --respawn server/index.tsx",
-    "start": "ts-node server/index.tsx",
+    "build": "esbuild --bundle app/web-components.tsx --outfile=public/bundle.js",
+    "watch": "esbuild --watch=forever --bundle app/web-components.tsx --outfile=public/bundle.js",
+    "dev": "npm run watch & ts-node-dev --respawn server/index.tsx",
+    "start": "npm run build && ts-node server/index.tsx",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",

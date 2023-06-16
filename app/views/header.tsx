@@ -1,9 +1,7 @@
 export function Header () {
   return (
     <header>
-      Yo
-      Folk
-      <a href="/">Home</a>
+      <a class='logo' href="/"><img src="/logo.svg" />yofolk</a>
     </header>
 
   )

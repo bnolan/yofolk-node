@@ -39,7 +39,7 @@ app.get('/api/posts/:id', async (req, res) => {
 
 app.get('/', async (req, res) => {
   let results = await getPosts()
-  res.status(200).send(render(<body><link href='/theme.css' type='text/css' rel='stylesheet' /><Home posts={results.rows} /></body>));
+  res.status(200).send(render(<body><script src="/bundle.js" /><link href='/theme.css' type='text/css' rel='stylesheet' /><Home posts={results.rows} /></body>));
 });
 app.post('/p', async (req, res) => {
   // let r = await createPost(user, req.body.content.toString())

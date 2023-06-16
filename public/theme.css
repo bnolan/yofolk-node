@@ -22,6 +22,24 @@ section{
   .id{
     /* color: red; */
   }
+
+  .meta{
+    display: block;
+    color: #666;
+  }
+
+  .post{
+    position: relative;
+    padding-left: 3rem;
+    min-height: 2rem;
+    margin-top: 1rem;
+  }
+
+  .x-icon{
+    position: absolute;
+    left: 0;
+    top: -0.5rem;
+  }
 }
 
 a{
@@ -30,4 +48,8 @@ a{
 
 form{
   display: none;
+}
+
+.logo img{
+  width: 4rem;
 }
