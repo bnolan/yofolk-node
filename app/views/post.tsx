@@ -8,7 +8,7 @@ export interface CommentRecord {
 export interface PostRecord {
   id: string
   content: string
-  user_id: string
+  author: string
   created_at: string
   comments: Array<CommentRecord>
 }

@@ -1,4 +1,4 @@
-import { getPosts, createComment, getPostById, createPost } from './posts'
+import { getPosts, createComment, getPostById, createPost, getUsers } from './posts'
 import * as bodyParser from 'body-parser'
 import * as express from 'express'
 import { render } from 'preact-render-to-string';
@@ -13,6 +13,17 @@ if (process.env.NODE_ENV != 'production') {
   app.set('json spaces', 2)
 }
 
+let users = {}
+
+main () 
+
+async function main (){
+  let rows = await getUsers()
+
+  rows.forEach(u => {
+    users[u.eth_address] = u.name
+  })
+}
 
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: false }))
@@ -39,7 +50,7 @@ app.get('/api/posts/:id', async (req, res) => {
 
 app.get('/', async (req, res) => {
   let results = await getPosts()
-  res.status(200).send(render(<body><script src="/bundle.js" /><link href='/theme.css' type='text/css' rel='stylesheet' /><Home posts={results.rows} /></body>));
+  res.status(200).send(render(<body><script src="/bundle.js" /><link href='/theme.css' type='text/css' rel='stylesheet' /><Home users={users} posts={results.rows} /></body>));
 });
 app.post('/p', async (req, res) => {
   // let r = await createPost(user, req.body.content.toString())

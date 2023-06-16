@@ -12,26 +12,30 @@ declare module 'preact/src/jsx' {
   }
 }
 
-export function Post (props: { post: PostRecord }) {
-  let { post } = props
+type UserCache = Record<string, string>
+
+export function Post (props: { users: UserCache, post: PostRecord }) {
+  let { post, users } = props
   
   let url = `/p/${post.id}`
 
   return (
     <div class='post'>
-      <x-icon wallet={post.user_id} />
-      <small class='meta'><a href={url}>{ post.id }</a></small>
+      <x-icon wallet={post.author} />
+      <small class='meta'><a href={url}>{ users[post.author] }</a></small>
       <cite>{post.content}</cite>
     </div>
   )
 }
 
+
 interface HomeProps {
+  users: UserCache
   posts: Array<PostRecord>
 }
 
 export default function Home (props: HomeProps) {
-  let posts = props.posts?.map(p => <Post post={p} />)
+  let posts = props.posts?.map(p => <Post users={props.users} post={p} />)
   let newPostUrl = '/p'
 
   return (
