@@ -1,9 +1,17 @@
+import { Buffer } from 'buffer'
+import { utils } from 'ethers'
+
+// @ts-ignore
+let ethereum = window.ethereum as any
+
+// @ts-ignore
+let cookieStore = window.cookieStore as any
+
 import jazzicon from 'jazzicon'
-import { Component } from 'preact';
+import { Component, Fragment } from 'preact';
 import register from 'preact-custom-element'
 import { useRef, useEffect } from 'preact/hooks'
 
-// <x-greeting name="Bo"></x-greeting>
 class XIcon extends Component {
   // Register as <x-greeting>:
   static tagName = 'x-icon';
@@ -32,6 +40,154 @@ class XIcon extends Component {
 }
 
 register(XIcon);
+
+let accounts: Array<string> | undefined
+const ACCOUNT_KEY = 'accounts'
+
+async function fetchStorage () {
+  if (sessionStorage.getItem(ACCOUNT_KEY) && ethereum.isConnected) {
+    try {
+      accounts = JSON.parse(sessionStorage.getItem(ACCOUNT_KEY))
+      return true
+    } catch (e) {
+      sessionStorage.removeItem(ACCOUNT_KEY)
+    }
+  }
+
+  return false
+}
+
+async function connect () {
+  await fetchStorage()
+
+  if (accounts) {
+    return
+  }
+ 
+  try {
+    accounts = await ethereum.request({ method: 'eth_requestAccounts' })
+
+    sessionStorage.setItem(ACCOUNT_KEY, JSON.stringify(accounts))
+  } catch (e) {
+
+    if (e.code === 4001) {
+      // EIP-1193 userRejectedRequest error
+      console.log('Please connect to MetaMask.');
+    } else {
+      console.error(e);
+    }
+  }
+}
+
+const COOKIE_KEY = 'yofolk-auth'
+
+async function hasCookie () {
+  if (await cookieStore.get(COOKIE_KEY)) {
+    try {
+      return true
+    }catch (e) {
+      cookieStore.delete(COOKIE_KEY)
+    }
+  }
+
+  return false
+}
+
+async function getWallet (): Promise<string | undefined> {
+  if (ethereum && await hasCookie() && await fetchStorage()) {
+    return accounts[0]
+  }
+}
+
+let account: string | undefined
+
+const SignOut = () => {
+  function signout () {
+    cookieStore.delete(COOKIE_KEY)
+    cookieStore.delete(COOKIE_KEY)
+    account = undefined
+    accounts = undefined
+    location.reload()
+  }
+
+  return <button onClick={signout}>Sign out</button>
+}
+
+const SignedIn = (props: { wallet: string }) => {
+  return <Fragment><span>Signed in as {props.wallet}</span> <SignOut /></Fragment>
+}
+
+class XSignIn extends Component<any, any> {
+  // Register as <x-greeting>:
+  static tagName = 'x-sign-in';
+
+  // Track these attributes:
+  static observedAttributes = ['name'];
+
+  async componentDidMount() {
+    let account = await getWallet()
+
+    if (account) {
+      this.setState({ account })
+    }
+  }
+
+  onClick = async () => {
+    if (!accounts) {
+      await connect()
+    }
+
+    if (!accounts) {
+      return
+    }
+
+    const domain = window.location.host;
+    const from = accounts[0];
+    const nonce = Math.floor(0xFFFFFF * Math.random())
+    const date = new Date().toISOString()
+    const siweMessage = `I accept the YoFolk Terms of Service.\n\nAccount: ${from}\nURI: https://${domain}\nVersion: 1\nChain ID: 1\nNonce: ${nonce}\nIssued At: ${date}`;
+    const msg = `0x${Buffer.from(siweMessage, 'utf8').toString('hex')}`;
+
+      const signature = await ethereum.request({
+        method: 'personal_sign',
+        params: [msg, from],
+      });
+
+      await this.setState({ account: from })
+
+      cookieStore.set(COOKIE_KEY, signature)
+     try {
+    } catch (err) {
+      console.error(err);
+      this.setState({ error: err.message })
+    }
+  }
+  
+  render(props) {
+    if (!ethereum) {
+      return <span />
+    }
+
+    // if (!account) {
+    //   account = await getWallet()
+    // } 
+
+    if (this.state.account) {
+      return <SignedIn wallet={this.state.account} />
+    }
+   
+    let { value } = props
+    
+    return (
+      <div>
+        {this.state.error}
+        <button onClick={this.onClick} class='x-signin'>{value || 'Sign in'}</button>
+      </div>
+    )
+  }
+}
+
+register(XSignIn);
 
 /*
 

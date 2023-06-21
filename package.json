@@ -1,6 +1,8 @@
 {
   "dependencies": {
+    "buffer": "^6.0.3",
     "esbuild": "^0.18.3",
+    "ethers": "^5",
     "express": "^4.18.2",
     "jazzicon": "^1.5.0",
     "pg": "^8.11.0",
@@ -18,8 +20,8 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "build": "esbuild --bundle app/web-components.tsx --outfile=public/bundle.js",
-    "watch": "esbuild --watch=forever --bundle app/web-components.tsx --outfile=public/bundle.js",
+    "build": "esbuild --target=chrome100 --bundle app/web-components.tsx --outfile=public/bundle.js",
+    "watch": "esbuild --target=chrome100 --watch=forever --bundle app/web-components.tsx --outfile=public/bundle.js",
     "dev": "npm run watch & ts-node-dev --respawn server/index.tsx",
     "start": "npm run build && ts-node server/index.tsx",
     "test": "echo \"Error: no test specified\" && exit 1"

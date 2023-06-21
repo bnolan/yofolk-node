@@ -8,6 +8,7 @@ declare module 'preact/src/jsx' {
       // available html-tags.
       interface IntrinsicElements {
           'x-icon': unknown;
+          'x-sign-in': unknown;
       }
   }
 }
@@ -42,6 +43,8 @@ export default function Home (props: HomeProps) {
     <section>
       <Header />
       
+      <x-sign-in />
+
       <form action={newPostUrl} method="post">
         <textarea name="content" />
         <input type="submit" value="Post" />
