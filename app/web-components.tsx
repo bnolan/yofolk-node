@@ -30,6 +30,7 @@ class XIcon extends Component {
       parseInt(wallet.slice(2, 10), 16)
     ) as HTMLDivElement
 
+    icon.style.borderRadius = '0'
     icon.style.clipPath = 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)'
 
     useEffect(() => {
