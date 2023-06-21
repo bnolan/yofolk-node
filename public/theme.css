@@ -50,6 +50,11 @@ form{
   display: none;
 }
 
+.signed-in form{
+  /* display: block; */
+}
+
 .logo img{
   width: 4rem;
 }
+

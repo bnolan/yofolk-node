@@ -1,5 +1,6 @@
 import { Buffer } from 'buffer'
 import { utils } from 'ethers'
+import { effect, signal } from "@preact/signals";
 
 // @ts-ignore
 let ethereum = window.ethereum as any
@@ -93,19 +94,30 @@ async function hasCookie () {
   return false
 }
 
-async function getWallet (): Promise<string | undefined> {
+const account = signal(undefined);
+
+async function initSession () {
   if (ethereum && await hasCookie() && await fetchStorage()) {
-    return accounts[0]
+    account.value = accounts[0]
   }
 }
 
-let account: string | undefined
+// Fetch wallet!
+initSession()
+
+effect(() => {
+  if (account.value) {
+    document.body.classList.add('signed-in')
+  } else {
+    document.body.classList.remove('signed-in')
+  }
+});
 
 const SignOut = () => {
   function signout () {
     cookieStore.delete(COOKIE_KEY)
     cookieStore.delete(COOKIE_KEY)
-    account = undefined
+    account.value = undefined
     accounts = undefined
     location.reload()
   }
@@ -123,14 +135,6 @@ class XSignIn extends Component<any, any> {
 
   // Track these attributes:
   static observedAttributes = ['name'];
-
-  async componentDidMount() {
-    let account = await getWallet()
-
-    if (account) {
-      this.setState({ account })
-    }
-  }
 
   onClick = async () => {
     if (!accounts) {
@@ -153,8 +157,7 @@ class XSignIn extends Component<any, any> {
         params: [msg, from],
       });
 
-      await this.setState({ account: from })
-
+      account.value = from
       cookieStore.set(COOKIE_KEY, signature)
      try {
     } catch (err) {
@@ -168,12 +171,8 @@ class XSignIn extends Component<any, any> {
       return <span />
     }
 
-    // if (!account) {
-    //   account = await getWallet()
-    // } 
-
-    if (this.state.account) {
-      return <SignedIn wallet={this.state.account} />
+    if (account.value) {
+      return <SignedIn wallet={account.value} />
     }
    
     let { value } = props
