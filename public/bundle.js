@@ -7288,6 +7288,7 @@
         parseInt(size || "32", 10),
         parseInt(wallet.slice(2, 10), 16)
       );
+      icon.style.borderRadius = "0";
       icon.style.clipPath = "polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)";
       p2(() => {
         div.current.appendChild(icon);
