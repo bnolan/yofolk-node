@@ -1,3 +1,4 @@
+import { Author } from '../components/author';
 import { Header } from './header'
 import { PostRecord } from './post'
 
@@ -23,7 +24,7 @@ export function Post (props: { users: UserCache, post: PostRecord }) {
   return (
     <div class='post'>
       <x-icon wallet={post.author} />
-      <small class='meta'><a href={url}>{ users[post.author] }</a></small>
+      <small class='meta'><a href={url}><Author author={post.author} users={users} /></a></small>
       <cite>{post.content}</cite>
     </div>
   )
@@ -42,8 +43,6 @@ export default function Home (props: HomeProps) {
   return (
     <section>
       <Header />
-      
-      <x-sign-in />
 
       <form action={newPostUrl} method="post">
         <textarea name="content" />

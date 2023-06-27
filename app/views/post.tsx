@@ -1,3 +1,4 @@
+import { Author } from "../components/author"
 import { Header } from "./header"
 import { UserCache } from "./home"
 
@@ -34,7 +35,7 @@ export function Comment (props: CommentProps) {
   return (
     <div class='comment'>
       <x-icon wallet={comment.author} />
-      <small class='meta'><a href={url}>{ users[comment.author] }</a></small>
+      <small class='meta'><a href={url}><Author author={comment.author} users={users} /></a></small>
       <cite>{comment.comment}</cite>
     </div>
   )
@@ -59,7 +60,7 @@ export default function Post (props: PostProps) {
 
       <div class='post view'>
         <x-icon wallet={post.author} />
-        <small class='meta'><a href={url}>{ users[post.author] }</a></small>
+        <small class='meta'><a href={url}><Author author={post.author} users={users} /></a></small>
         <time>{ post.created_at }</time>
         <cite>{post.content}</cite>
 

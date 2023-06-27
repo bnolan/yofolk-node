@@ -117,6 +117,7 @@ effect(() => {
 const SignOut = () => {
   function signout () {
     cookieStore.delete(COOKIE_KEY)
+    sessionStorage.removeItem(ACCOUNT_KEY)
     account.value = undefined
     accounts = undefined
     location.reload()

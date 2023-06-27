@@ -73,11 +73,15 @@ async function auth (req: AuthenticatedRequest, res, next) {
   }
 }
 
+function page (component) {
+  return render(<body><script src="/bundle.js" /><link href='/theme.css' type='text/css' rel='stylesheet' />{component}</body>);
+}
+
 // Views
 
 app.get('/', async (req, res) => {
   let results = await getPosts()
-  res.status(200).send(render(<body><script src="/bundle.js" /><link href='/theme.css' type='text/css' rel='stylesheet' /><Home users={users} posts={results.rows} /></body>));
+  res.status(200).send(page(<Home users={users} posts={results.rows} />))
 });
 app.post('/p', auth, async (req: AuthenticatedRequest, res) => {
   let r = await createPost(req.user, req.body.content.toString())
@@ -85,7 +89,7 @@ app.post('/p', auth, async (req: AuthenticatedRequest, res) => {
 })
 app.get('/p/:id', async (req, res) => {
   let results = await getPostById(req.params.id.toString())
-  res.status(200).send(render(<body><script src="/bundle.js" /><link href='/theme.css' type='text/css' rel='stylesheet' /><Post users={users} post={results.rows[0]} /></body>));
+  res.status(200).send(page(<Post users={users} post={results.rows[0]} />));
 })
 app.post('/p/:id/c', auth, async (req: AuthenticatedRequest, res) => {
   let id = req.params.id.toString()

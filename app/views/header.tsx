@@ -11,6 +11,8 @@ export function Header () {
       <small>Yofolk is an experiment in social networking on ethereum</small>
     </p>
 
+    <x-sign-in />
+
     </header>
 
   )
