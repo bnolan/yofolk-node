@@ -25,8 +25,8 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "build": "esbuild --target=chrome100 --bundle app/web-components.tsx --outfile=public/bundle.js & less-watch-compiler app public",
-    "watch": "esbuild --target=chrome100 --watch=forever --bundle app/web-components.tsx --outfile=public/bundle.js && lessc app/theme.less public/theme.css",
+    "build": "esbuild --target=chrome100 --bundle app/web-components.tsx --outfile=public/bundle.js && lessc app/theme.less public/theme.css",
+    "watch": "esbuild --target=chrome100 --watch=forever --bundle app/web-components.tsx --outfile=public/bundle.js & less-watch-compiler app public",
     "dev": "npm run watch & ts-node-dev --respawn server/index.tsx",
     "start": "npm run build && ts-node server/index.tsx",
     "test": "echo \"Error: no test specified\" && exit 1"
