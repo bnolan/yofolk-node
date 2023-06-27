@@ -106,13 +106,15 @@ async function initSession () {
 // Fetch wallet!
 initSession()
 
-effect(() => {
-  if (account.value) {
-    document.body.classList.add('signed-in')
-  } else {
-    document.body.classList.remove('signed-in')
-  }
-});
+document.onload = () => {
+  effect(() => {
+    if (account.value) {
+      document.body.classList.add('signed-in')
+    } else {
+      document.body.classList.remove('signed-in')
+    }
+  });
+}
 
 const SignOut = () => {
   function signout () {

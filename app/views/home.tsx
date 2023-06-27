@@ -2,18 +2,6 @@ import { Author } from '../components/author';
 import { Header } from './header'
 import { PostRecord } from './post'
 
-declare module 'preact/src/jsx' {
-  namespace JSXInternal {
-
-      // We're extending the IntrinsicElements interface which holds a kv-list of
-      // available html-tags.
-      interface IntrinsicElements {
-          'x-icon': unknown;
-          'x-sign-in': unknown;
-      }
-  }
-}
-
 export type UserCache = Record<string, string>
 
 export function Post (props: { users: UserCache, post: PostRecord }) {
