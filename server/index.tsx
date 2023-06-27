@@ -85,7 +85,7 @@ app.post('/p', auth, async (req: AuthenticatedRequest, res) => {
 })
 app.get('/p/:id', async (req, res) => {
   let results = await getPostById(req.params.id.toString())
-  res.status(200).send(render(<body><link href='/theme.css' type='text/css' rel='stylesheet' /><Post post={results.rows[0]} /></body>));
+  res.status(200).send(render(<body><script src="/bundle.js" /><link href='/theme.css' type='text/css' rel='stylesheet' /><Post users={users} post={results.rows[0]} /></body>));
 })
 app.post('/p/:id/c', auth, async (req: AuthenticatedRequest, res) => {
   let id = req.params.id.toString()
