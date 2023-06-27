@@ -117,7 +117,6 @@ effect(() => {
 const SignOut = () => {
   function signout () {
     cookieStore.delete(COOKIE_KEY)
-    cookieStore.delete(COOKIE_KEY)
     account.value = undefined
     accounts = undefined
     location.reload()
@@ -153,13 +152,15 @@ class XSignIn extends Component<any, any> {
     const siweMessage = `I accept the YoFolk Terms of Service.\n\nAccount: ${from}\nURI: https://${domain}\nVersion: 1\nChain ID: 1\nNonce: ${nonce}\nIssued At: ${date}`;
     const msg = `0x${Buffer.from(siweMessage, 'utf8').toString('hex')}`;
 
-      const signature = await ethereum.request({
+      const sig = await ethereum.request({
         method: 'personal_sign',
         params: [msg, from],
       });
 
+      let cookie = JSON.stringify({ msg: siweMessage, from, sig })
+      cookieStore.set(COOKIE_KEY, cookie)
+
       account.value = from
-      cookieStore.set(COOKIE_KEY, signature)
      try {
     } catch (err) {
       console.error(err);
