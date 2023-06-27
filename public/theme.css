@@ -51,7 +51,7 @@ form{
 }
 
 .signed-in form{
-  /* display: block; */
+  display: block;
 }
 
 .logo img{
