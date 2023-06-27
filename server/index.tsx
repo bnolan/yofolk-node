@@ -74,7 +74,18 @@ async function auth (req: AuthenticatedRequest, res, next) {
 }
 
 function page (component) {
-  return render(<body><script src="/bundle.js" /><link href='/theme.css' type='text/css' rel='stylesheet' />{component}</body>);
+  return render(
+    <html>
+      <head>
+        <script src="/bundle.js" />
+        <link href='/theme.css' type='text/css' rel='stylesheet' />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+      </head>
+      <body>
+        {component}
+      </body>
+    </html>
+  );
 }
 
 // Views
