@@ -1,6 +1,6 @@
 import { Buffer } from 'buffer'
 import { utils } from 'ethers'
-import { effect, signal } from "@preact/signals";
+import { batch, effect, signal } from "@preact/signals";
 
 // @ts-ignore
 let ethereum = window.ethereum as any
@@ -106,15 +106,27 @@ async function initSession () {
 // Fetch wallet!
 initSession()
 
-document.onload = () => {
-  effect(() => {
-    if (account.value) {
-      document.body.classList.add('signed-in')
-    } else {
-      document.body.classList.remove('signed-in')
-    }
-  });
+function toggleClass (value) {
+  let body = document.querySelector('body')
+
+  if (!body) {
+    return
+  }
+
+  if (value) {
+    body.classList.add('signed-in')
+  } else {
+    body.classList.remove('signed-in')
+  }
 }
+
+window.addEventListener("load", (event) => {
+  toggleClass(account.value)
+})
+
+effect(() => {
+  toggleClass(account.value)
+})
 
 const SignOut = () => {
   function signout () {
