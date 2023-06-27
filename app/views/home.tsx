@@ -13,7 +13,7 @@ declare module 'preact/src/jsx' {
   }
 }
 
-type UserCache = Record<string, string>
+export type UserCache = Record<string, string>
 
 export function Post (props: { users: UserCache, post: PostRecord }) {
   let { post, users } = props
