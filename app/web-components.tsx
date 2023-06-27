@@ -1,6 +1,10 @@
 import { Buffer } from 'buffer'
 import { utils } from 'ethers'
-import { batch, effect, signal } from "@preact/signals";
+import { effect, signal } from "@preact/signals";
+import { Core } from '@walletconnect/core'
+import { WalletConnectModalAuth } from "@walletconnect/modal-auth-html";
+
+let projectId = '57a44dd49a2cb498967d87490efc6336'
 
 // @ts-ignore
 let ethereum = window.ethereum as any
@@ -59,6 +63,24 @@ async function fetchStorage () {
   return false
 }
 
+let modal
+
+async function getModal () {
+  if (!modal) {
+    modal = new WalletConnectModalAuth({
+      projectId,
+      metadata: {
+        name: "Yo Folk",
+        description: "Simple social network with ethereum identities",
+        url: "https://www.yofolk.com",
+        icons: ["https://www.yofolk.com/logo.png"],
+      },
+    });
+  }
+
+  return modal
+}
+
 async function connect () {
   await fetchStorage()
 
@@ -66,18 +88,23 @@ async function connect () {
     return
   }
  
-  try {
-    accounts = await ethereum.request({ method: 'eth_requestAccounts' })
+  if (ethereum) {
+    try {
+      accounts = await ethereum.request({ method: 'eth_requestAccounts' })
 
-    sessionStorage.setItem(ACCOUNT_KEY, JSON.stringify(accounts))
-  } catch (e) {
+      sessionStorage.setItem(ACCOUNT_KEY, JSON.stringify(accounts))
+    } catch (e) {
 
-    if (e.code === 4001) {
-      // EIP-1193 userRejectedRequest error
-      console.log('Please connect to MetaMask.');
-    } else {
-      console.error(e);
+      if (e.code === 4001) {
+        // EIP-1193 userRejectedRequest error
+        console.log('Please connect to MetaMask.');
+      } else {
+        console.error(e);
+      }
     }
+  } else {
+    let m  = await getModal()
+    await m.signIn({ statement: "Sign in to yofolk" });
   }
 }
 
@@ -184,10 +211,6 @@ class XSignIn extends Component<any, any> {
   }
   
   render(props) {
-    if (!ethereum) {
-      return <span />
-    }
-
     if (account.value) {
       return <SignedIn wallet={account.value} />
     }
