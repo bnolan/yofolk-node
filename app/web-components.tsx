@@ -45,16 +45,14 @@ class XIcon extends Component {
 
 register(XIcon);
 
-let accounts: Array<string> | undefined
-const ACCOUNT_KEY = 'accounts'
+const ACCOUNT_KEY = 'account'
 
-async function fetchStorage () {
-  if (sessionStorage.getItem(ACCOUNT_KEY)) {
+async function fetchAccount () {
+  if (localStorage.getItem(ACCOUNT_KEY)) {
     try {
-      accounts = JSON.parse(sessionStorage.getItem(ACCOUNT_KEY))
-      return true
+      return localStorage.getItem(ACCOUNT_KEY)
     } catch (e) {
-      sessionStorage.removeItem(ACCOUNT_KEY)
+      localStorage.removeItem(ACCOUNT_KEY)
     }
   }
 
@@ -148,6 +146,7 @@ async function initWalletConnect () {
   }
 }
 
+let accounts = signal([])
 let sessionConnected = false
 
 function onSessionConnect (args) {
@@ -155,19 +154,22 @@ function onSessionConnect (args) {
 
   console.log('onSessionConnect', args)
 
-  accounts = args.namespaces.eip155.accounts.map(a => a.replace('eip155:1:', ''))
-  sessionStorage.setItem(ACCOUNT_KEY, JSON.stringify(accounts))
+  accounts.value = args.namespaces.eip155.accounts.map(a => a.replace('eip155:1:', ''))
 }
 
-function sessionConnect () {
+function hasAccount () {
   return new Promise((resolve, reject) => {
     function test () {
-      if (sessionConnected) {
-        resolve(true)
+      console.log(accounts.peek())
+     
+      if (accounts.peek().length > 0) {
+        resolve(accounts.peek())
       } else {
         setTimeout(test, 100)
       }
     }
+
+    test()
   })
 }
 
@@ -176,19 +178,9 @@ function onSessionUpdate (args) {
 }
 
 async function connect () {
-  await fetchStorage()
-
-  if (accounts) {
-    return
-  }
- 
-  if (!ethereum) {
-    await initWalletConnect()
-    await sessionConnect()
-  } else {
+  if (ethereum) {
     try {
-      accounts = await ethRequest({ method: 'eth_requestAccounts' })
-      sessionStorage.setItem(ACCOUNT_KEY, JSON.stringify(accounts))
+      accounts.value = await ethRequest({ method: 'eth_requestAccounts' })
     } catch (e) {
 
       if (e.code === 4001) {
@@ -198,6 +190,8 @@ async function connect () {
         console.error(e);
       }
     }
+  } else {
+    await initWalletConnect()
   }
 }
 
@@ -218,8 +212,8 @@ async function hasCookie () {
 const account = signal(undefined);
 
 async function initSession () {
-  if (await hasCookie() && await fetchStorage()) {
-    account.value = accounts[0]
+  if (await hasCookie() && await fetchAccount()) {
+    account.value = await fetchAccount()
   }
 }
 
@@ -251,7 +245,7 @@ effect(() => {
 const SignOut = () => {
   function signout () {
     document.cookie = `${COOKIE_KEY}=;expires=Thu, 01 Jan 1970 00:00:01 GMT`
-    sessionStorage.removeItem(ACCOUNT_KEY)
+    localStorage.removeItem(ACCOUNT_KEY)
     account.value = undefined
     accounts = undefined
     location.reload()
@@ -265,16 +259,18 @@ const SignedIn = (props: { wallet: string }) => {
 }
 
 async function ethRequest(request) {
+  console.log(request)
+
   let r
 
-  if (signClient && session) {
+  if (ethereum) {
+    r = await ethereum.request(request)
+  } else if (signClient && session) {
     r = await signClient.request({
       topic: session.topic,
       chainId: 'eip155:1',
       request
     })
-  } else if (ethereum) {
-    r = await ethereum.request(request)
   } else {
     console.error('Cannot do ethRequest')
   }
@@ -290,13 +286,11 @@ class XSignIn extends Component<any, any> {
   static observedAttributes = ['name'];
 
   onClick = async () => {
-    if (!ethereum || session) {
-      console.log('connecting...')
-      await connect()
-    }
+    await connect()
+    await hasAccount()
 
     const domain = window.location.host;
-    const from = accounts[0];
+    const from = accounts.value[0]
     const nonce = Math.floor(0xFFFFFF * Math.random())
     const date = new Date().toISOString()
     const siweMessage = `I accept the YoFolk Terms of Service.\n\nURI: https://${domain}\nVersion: 1\nChain ID: 1\nNonce: ${nonce}\nIssued At: ${date}`;
@@ -314,13 +308,7 @@ class XSignIn extends Component<any, any> {
     document.cookie = `${COOKIE_KEY}=${cookie};expires=${expiry.toUTCString()}`
 
     account.value = from
-
-    try {
-
-    } catch (err) {
-      console.error(err);
-      this.setState({ error: err.message })
-    }
+    localStorage.setItem(ACCOUNT_KEY, account.value)
   }
   
   render(props) {
