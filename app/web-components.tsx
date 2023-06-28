@@ -1,16 +1,14 @@
 import { Buffer } from 'buffer'
 import { utils } from 'ethers'
-import { effect, signal } from "@preact/signals";
+import { effect, signal } from "@preact/signals"
 import { Core } from '@walletconnect/core'
-import { WalletConnectModalAuth } from "@walletconnect/modal-auth-html";
 
-let projectId = '57a44dd49a2cb498967d87490efc6336'
+// Fucking wallet connect hugeness - would like to nerf all this from the bundle one day
+import SignClient from '@walletconnect/sign-client'
+import { WalletConnectModal } from '@walletconnect/modal'
 
 // @ts-ignore
 let ethereum = window.ethereum as any
-
-// @ts-ignore
-let cookieStore = window.cookieStore as any
 
 import jazzicon from 'jazzicon'
 import { Component, Fragment } from 'preact';
@@ -51,7 +49,7 @@ let accounts: Array<string> | undefined
 const ACCOUNT_KEY = 'accounts'
 
 async function fetchStorage () {
-  if (sessionStorage.getItem(ACCOUNT_KEY) && ethereum.isConnected) {
+  if (sessionStorage.getItem(ACCOUNT_KEY)) {
     try {
       accounts = JSON.parse(sessionStorage.getItem(ACCOUNT_KEY))
       return true
@@ -63,22 +61,118 @@ async function fetchStorage () {
   return false
 }
 
-let modal
+let signClient
+let walletConnectModal
+let session
 
-async function getModal () {
-  if (!modal) {
-    modal = new WalletConnectModalAuth({
+window.global = window
+
+async function initWalletConnect () {
+  let projectId = '57a44dd49a2cb498967d87490efc6336'
+
+  try {
+    signClient = await SignClient.init({
       projectId,
       metadata: {
-        name: "Yo Folk",
-        description: "Simple social network with ethereum identities",
-        url: "https://www.yofolk.com",
-        icons: ["https://www.yofolk.com/logo.png"],
-      },
-    });
-  }
+        name: 'Yo Folk',
+        description: 'Simple social network with ethereum identities',
+        url: 'https://www.yofolk.com',
+        icons: ['https://www.yofolk.com/logo.png']
+      }
+    })
 
-  return modal
+    signClient.on("session_proposal", (event) => {
+      console.log("session_proposal", event)
+    })
+
+    signClient.on('session_event', ({ event }) => {
+      console.log('session_event', event)
+      // Handle session events, such as "chainChanged", "accountsChanged", etc.
+    })
+    
+    signClient.on('session_update', ({ topic, params }) => {
+      console.log('session_update', topic, params)
+
+      const { namespaces } = params
+      const _session = signClient.session.get(topic)
+      // Overwrite the `namespaces` of the existing session with the incoming one.
+      const updatedSession = { ..._session, namespaces }
+      // Integrate the updated session state into your dapp state.
+      onSessionUpdate(updatedSession)
+    })
+    
+    signClient.on('session_delete', () => {
+      console.log('session_delete')
+      // Session was deleted -> reset the dapp state, clean up from user session, etc.
+    })
+    
+    walletConnectModal = new WalletConnectModal({
+      projectId,
+      // `standaloneChains` can also be specified when calling `walletConnectModal.openModal(...)` later on.
+      // standaloneChains: ['eip155:1']
+    })
+    
+    
+    const { uri, approval } = await signClient.connect({
+      // Provide the namespaces and chains (e.g. `eip155` for EVM-based chains) we want to use in this session.
+      requiredNamespaces: {
+        eip155: {
+          methods: [
+            // 'eth_sendTransaction',
+            // 'eth_signTransaction',
+            // 'eth_sign',
+            'personal_sign',
+            // 'requestAccounts',
+            // 'eth_requestAccounts',
+            // 'eth_signTypedData'
+          ],
+          chains: ['eip155:1'],
+          events: ['chainChanged', 'accountsChanged']
+        }
+      }
+    })
+  
+    // Open QRCode modal if a URI was returned (i.e. we're not connecting an existing pairing).
+    if (uri) {
+      walletConnectModal.openModal({ uri })
+      // Await session approval from the wallet.
+      session = await approval()
+      // Handle the returned session (e.g. update UI to "connected" state).
+      // * You will need to create this function *
+      onSessionConnect(session)
+      // Close the QRCode modal in case it was open.
+      walletConnectModal.closeModal()
+    }
+  } catch (e) {
+    console.error(e)
+  }
+}
+
+let sessionConnected = false
+
+function onSessionConnect (args) {
+  sessionConnected = true
+
+  console.log('onSessionConnect', args)
+
+  accounts = args.namespaces.eip155.accounts.map(a => a.replace('eip155:1:', ''))
+  sessionStorage.setItem(ACCOUNT_KEY, JSON.stringify(accounts))
+}
+
+function sessionConnect () {
+  return new Promise((resolve, reject) => {
+    function test () {
+      if (sessionConnected) {
+        resolve(true)
+      } else {
+        setTimeout(test, 100)
+      }
+    }
+  })
+}
+
+function onSessionUpdate (args) {
+  console.log('onSessionUpdate', args)
 }
 
 async function connect () {
@@ -88,10 +182,12 @@ async function connect () {
     return
   }
  
-  if (ethereum) {
+  if (!ethereum) {
+    await initWalletConnect()
+    await sessionConnect()
+  } else {
     try {
-      accounts = await ethereum.request({ method: 'eth_requestAccounts' })
-
+      accounts = await ethRequest({ method: 'eth_requestAccounts' })
       sessionStorage.setItem(ACCOUNT_KEY, JSON.stringify(accounts))
     } catch (e) {
 
@@ -102,20 +198,17 @@ async function connect () {
         console.error(e);
       }
     }
-  } else {
-    let m  = await getModal()
-    await m.signIn({ statement: "Sign in to yofolk" });
   }
 }
 
 const COOKIE_KEY = 'yofolk-auth'
 
 async function hasCookie () {
-  if (await cookieStore.get(COOKIE_KEY)) {
+  if (await document.cookie.match(COOKIE_KEY)) {
     try {
       return true
     }catch (e) {
-      cookieStore.delete(COOKIE_KEY)
+      document.cookie = `${COOKIE_KEY}=;expires=Thu, 01 Jan 1970 00:00:01 GMT`
     }
   }
 
@@ -125,7 +218,7 @@ async function hasCookie () {
 const account = signal(undefined);
 
 async function initSession () {
-  if (ethereum && await hasCookie() && await fetchStorage()) {
+  if (await hasCookie() && await fetchStorage()) {
     account.value = accounts[0]
   }
 }
@@ -157,7 +250,7 @@ effect(() => {
 
 const SignOut = () => {
   function signout () {
-    cookieStore.delete(COOKIE_KEY)
+    document.cookie = `${COOKIE_KEY}=;expires=Thu, 01 Jan 1970 00:00:01 GMT`
     sessionStorage.removeItem(ACCOUNT_KEY)
     account.value = undefined
     accounts = undefined
@@ -171,6 +264,24 @@ const SignedIn = (props: { wallet: string }) => {
   return <Fragment><span>Signed in as {props.wallet}</span> <SignOut /></Fragment>
 }
 
+async function ethRequest(request) {
+  let r
+
+  if (signClient && session) {
+    r = await signClient.request({
+      topic: session.topic,
+      chainId: 'eip155:1',
+      request
+    })
+  } else if (ethereum) {
+    r = await ethereum.request(request)
+  } else {
+    console.error('Cannot do ethRequest')
+  }
+
+  return r
+}
+
 class XSignIn extends Component<any, any> {
   // Register as <x-greeting>:
   static tagName = 'x-sign-in';
@@ -179,31 +290,33 @@ class XSignIn extends Component<any, any> {
   static observedAttributes = ['name'];
 
   onClick = async () => {
-    if (!accounts) {
+    if (!ethereum || session) {
+      console.log('connecting...')
       await connect()
-    }
-
-    if (!accounts) {
-      return
     }
 
     const domain = window.location.host;
     const from = accounts[0];
     const nonce = Math.floor(0xFFFFFF * Math.random())
     const date = new Date().toISOString()
-    const siweMessage = `I accept the YoFolk Terms of Service.\n\nAccount: ${from}\nURI: https://${domain}\nVersion: 1\nChain ID: 1\nNonce: ${nonce}\nIssued At: ${date}`;
+    const siweMessage = `I accept the YoFolk Terms of Service.\n\nURI: https://${domain}\nVersion: 1\nChain ID: 1\nNonce: ${nonce}\nIssued At: ${date}`;
     const msg = `0x${Buffer.from(siweMessage, 'utf8').toString('hex')}`;
+   
+    const sig = await ethRequest({
+      method: 'personal_sign',
+      params: [msg, from],
+    });
 
-      const sig = await ethereum.request({
-        method: 'personal_sign',
-        params: [msg, from],
-      });
+    // 26 weeks
+    const expiry = new Date(Date.now() + (26 * 7 * 24 * 60 * 60 * 1000))
 
-      let cookie = JSON.stringify({ msg: siweMessage, from, sig })
-      cookieStore.set(COOKIE_KEY, cookie)
+    let cookie = JSON.stringify({ msg: siweMessage, from, sig })
+    document.cookie = `${COOKIE_KEY}=${cookie};expires=${expiry.toUTCString()}`
 
-      account.value = from
-     try {
+    account.value = from
+
+    try {
+
     } catch (err) {
       console.error(err);
       this.setState({ error: err.message })
