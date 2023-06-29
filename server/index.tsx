@@ -1,4 +1,4 @@
-import { getPosts, createComment, getPostById, createPost, getUsers } from './posts'
+import { getPosts, getSummary, createComment, getPostById, createPost, getUsers } from './posts'
 import * as bodyParser from 'body-parser'
 import * as express from 'express'
 import { render } from 'preact-render-to-string';
@@ -97,6 +97,10 @@ app.get('/', async (req, res) => {
 app.post('/p', auth, async (req: AuthenticatedRequest, res) => {
   let r = await createPost(req.user, req.body.content.toString())
   res.redirect('/')
+})
+app.get('/p/summary', async (req, res) => {
+  let summary = await getSummary(users)
+  res.type('text/plain').send(summary) // setHeader('content-type', 'text/plain');
 })
 app.get('/p/:id', async (req, res) => {
   let results = await getPostById(req.params.id.toString())
