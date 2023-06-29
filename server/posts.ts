@@ -54,8 +54,13 @@ export const getSummary = async (users) => {
     return st ? (users[st] || (st.slice(0, 6) + '..')) : 'unknown'
   }
 
+  let d = new Date()
+  d.setHours(0)
+  d.setMinutes(0)
 
-  let startDate = '2023-05-01'
+  // @ts-ignore
+  d = new Date(d - 1000 * 3600 * 24 * 7)
+
   let result = await pool.query(`
     SELECT 
       ${fields} 
@@ -67,7 +72,7 @@ export const getSummary = async (users) => {
       p.created_at > $1 or c.created_at > $1
     GROUP BY
       p.id
-  `, [startDate]
+  `, [d]
   )
 
   let posts = result.rows.slice() as Array<PostRecord>
@@ -75,7 +80,11 @@ export const getSummary = async (users) => {
     return `${username(p.author)} said "${inline(p.content)}"` + p.comments.filter(c => c.comment).map(c => `and ${username(c.author)} replied "${inline(c.comment)}"`).join(' ')
   }).join("\n")
 
-  const res = await gpt.sendMessage(text)
+  if (posts.length == 0) {
+    text = "Nothing is happening"
+  }
+  
+  const res = await gpt.sendMessage(`Please summarise in as few words as possible:\n\n${text}`)
   return res.text
 }
 
