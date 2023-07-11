@@ -14,7 +14,7 @@ export function Header () {
   return (
     <header>
       <div class='logo'>
-        <a href="/"><img src="/logo.svg" /><br />yofolk</a>
+        <a href="/"><img src="/logo.svg" /><br />yo folk</a>
       </div>
 
       <p>

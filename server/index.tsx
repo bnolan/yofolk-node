@@ -81,6 +81,8 @@ function page (component) {
         <script src="/bundle.js" />
         <link href='/theme.css' type='text/css' rel='stylesheet' />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link rel="shortcut icon" href="/logo.svg" />
+        <title>yo folk</title>
       </head>
       <body>
         {component}
