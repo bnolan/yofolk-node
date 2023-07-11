@@ -78,7 +78,7 @@ const Format = (props : ValueProps) => {
 }
 
 const Embeds = (props: ValueProps): any => {
-  const re = new RegExp('https://(www.voxels.com/parcels/\\d+)', 'g')
+  const re = new RegExp('https://(www.voxels.com/(womps|parcels)/\\d+)', 'g')
   const matches = Array.from(props.value.matchAll(re))
 
   return matches.length > 0 ? <ul>{matches.map(m => <iframe class='voxels-embed' src={m[0]} />)}</ul> : null
