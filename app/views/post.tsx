@@ -36,7 +36,7 @@ export function Comment (props: CommentProps) {
     <div class='comment'>
       <x-icon wallet={comment.author} />
       <small class='meta'><a href={url}><Author author={comment.author} users={users} /></a></small>
-      <cite>{comment.comment}</cite>
+      <Format value={comment.comment} />
     </div>
   )
 }
@@ -44,6 +44,37 @@ export function Comment (props: CommentProps) {
 interface PostProps {
   users: UserCache
   post: PostRecord
+}
+
+interface ValueProps {
+  value: string
+}
+
+const Linkify = (props : ValueProps): any => {
+  const re = new RegExp('https://\\S+', 'g')
+
+  let elements = []
+  let match
+  let lastIndex = 0
+
+  while (match = re.exec(props.value)) {
+    if (lastIndex < match.index) {
+      elements.push(props.value.substring(lastIndex, match.index))
+    }
+
+    elements.push(<a rel='nofollow' href={match[0]}>{match[0].slice(8)}</a>)
+    lastIndex += match.index + match[0].length
+  }
+
+  if (props.value.length > lastIndex) {
+    elements.push(props.value.substring(lastIndex));
+  }
+
+  return (elements.length === 1) ? elements[0] : elements
+}
+
+const Format = (props : ValueProps) => {
+  return <cite class='content'>{props.value.split("\n").map((str, key) => <div key={key}><Linkify value={str} /></div>)}</cite>
 }
 
 export default function Post (props: PostProps) {
@@ -62,7 +93,7 @@ export default function Post (props: PostProps) {
         <x-icon wallet={post.author} />
         <small class='meta'><a href={url}><Author author={post.author} users={users} /></a></small>
         <time>{ post.created_at }</time>
-        <cite>{post.content}</cite>
+        <Format value={post.content} />
 
         <div class='comments'>
           { comments }

@@ -53,11 +53,6 @@ section{
       left: 0;
       top: -0.5rem;
     }
-
-    cite{
-      overflow-wrap: break-word;
-      word-wrap: break-word;
-    }
   }
 
   .comment{
@@ -70,6 +65,26 @@ section{
       position: absolute;
       left: -0.5rem;
       top: 0rem;
+    }
+  }
+
+  cite{
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+
+    div{
+      margin-bottom: 1rem;
+    }
+
+    a[rel]{
+      // truncate
+      max-width: 12rem;
+      overflow: none;
+      display: inline-block;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      overflow: hidden;
+      vertical-align: top
     }
   }
 
@@ -97,10 +112,26 @@ section{
 
 a{
   color: #333;
+
+  &:hover{
+    background: #333;
+    color: #eee;
+    border-radius: 2px;
+  }
+
+  &[rel]:hover{
+    background: #A33;
+  }
 }
 
 form{
   display: none;
+
+  textarea{
+    width: 100%;
+    min-height: 4rem;
+    margin: 0.5rem 0;
+  }
 }
 
 body.signed-in{
