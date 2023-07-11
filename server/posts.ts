@@ -1,5 +1,6 @@
 import { Pool } from 'pg'
 import { migrate } from "postgres-migrations"
+import fetch from 'unfetch'
 
 const connectionString = process.env.DATABASE_URL || "postgres://localhost/yofolk-prod"
 
