@@ -1,0 +1,1 @@
+update posts set public = coalesce((select public from users where id=posts.user_id), true);

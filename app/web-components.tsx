@@ -40,7 +40,7 @@ class XIcon extends Component {
     });
     
     let href = `/u/${wallet}`
-    
+
     return <a href={href} class='x-icon' ref={div} />
   }
 }
@@ -257,7 +257,9 @@ const SignOut = () => {
 }
 
 const SignedIn = (props: { wallet: string }) => {
-  return <Fragment><span>Signed in as {props.wallet}</span> <SignOut /></Fragment>
+  let href = `/u/${props.wallet}`
+
+  return <Fragment><span>Signed in as <a href={href}>{props.wallet}</a></span> <SignOut /></Fragment>
 }
 
 async function ethRequest(request) {
