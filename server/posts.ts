@@ -1,6 +1,11 @@
 import { Pool } from 'pg'
 import { migrate } from "postgres-migrations"
-import fetch from 'unfetch'
+const { Configuration, OpenAIApi } = require("openai");
+
+const configuration = new Configuration({
+  apiKey: process.env.OPENAI_API_KEY,
+});
+const openai = new OpenAIApi(configuration);
 
 const connectionString = process.env.DATABASE_URL || "postgres://localhost/yofolk-prod"
 
@@ -40,13 +45,6 @@ export const getUsers = async () => {
 let gpt
 
 export const getSummary = async (users) => {
-  if (!gpt) {
-    const importDynamic = new Function('modulePath', 'return import(modulePath)')
-    const { ChatGPTAPI } = await importDynamic('chatgpt')
-    
-    gpt = new ChatGPTAPI({ apiKey: process.env.OPENAI_API_KEY })
-  }
-
   function inline (st?: string) {
     return st?.replace(/[\r\t\s\n]+/g, ' ').replace(/"/g, '')
   }
@@ -85,8 +83,14 @@ export const getSummary = async (users) => {
     text = "Nothing is happening"
   }
   
-  const res = await gpt.sendMessage(`Please summarise in as few words as possible:\n\n${text}`)
-  return res.text
+  const content = `Please summarise:\n\n${text}`
+ 
+  const chatCompletion = await openai.createChatCompletion({
+    model: "gpt-3.5-turbo",
+    messages: [{role: "user", content}],
+  });
+
+  return chatCompletion.data.choices[0].message
 }
 
 export const getPosts = async () => {
