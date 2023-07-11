@@ -39,7 +39,9 @@ class XIcon extends Component {
       div.current.appendChild(icon)
     });
     
-    return <div class='x-icon' ref={div} />
+    let href = `/u/${wallet}`
+    
+    return <a href={href} class='x-icon' ref={div} />
   }
 }
 

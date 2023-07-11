@@ -1,4 +1,4 @@
-import { getPosts, getSummary, createComment, getPostById, createPost, getUsers } from './posts'
+import { getPosts, getSummary, getPostsByUser, createComment, getPostById, createPost, getUsers } from './posts'
 import * as bodyParser from 'body-parser'
 import * as express from 'express'
 import { render } from 'preact-render-to-string';
@@ -7,6 +7,7 @@ import { ethers } from 'ethers'
 
 import Home from '../app/views/home'
 import Post from '../app/views/post'
+import User from '../app/views/user'
 
 const app = express();
 const port = process.env.PORT || 3000
@@ -111,6 +112,11 @@ app.post('/p/:id/c', auth, async (req: AuthenticatedRequest, res) => {
   let results = await createComment(req.user, id, req.body.comment.toString())
   let path = `/p/${id}`
   res.redirect(path)
+})
+app.get('/u/:id', async (req, res) => {
+  let user = req.params.id.toString() as wallet
+  let results = await getPostsByUser(user)
+  res.status(200).send(page(<User users={users} user={user} posts={results.rows} />))
 })
 
 // app.post('/users', db.createUser);

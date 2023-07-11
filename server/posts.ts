@@ -103,6 +103,23 @@ export const getPosts = async () => {
     `)
 }
 
+export const getPostsByUser = async (user: Wallet) => {
+  return pool.query(`
+    SELECT 
+      ${fields} 
+    FROM 
+      posts p 
+    LEFT JOIN
+      comments c on commentable_id = p.id
+    WHERE
+      p.user_address = $1
+    GROUP BY
+      p.id
+    ORDER BY 
+      created_at DESC
+    `, [user])
+}
+
 export const getPostById = (id: string) => {
   return pool.query(`
     SELECT 

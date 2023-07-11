@@ -1,17 +1,18 @@
 import { Author } from '../components/author';
 import Summary from '../components/summary';
 import { Header } from './header'
+import { UserCache } from './home';
 import { PostRecord } from './post'
 
-export type UserCache = Record<string, string>
+type wallet = string
 
-
-interface HomeProps {
+interface UserProps {
   users: UserCache
+  user: wallet
   posts: Array<PostRecord>
 }
 
-export default function Home (props: HomeProps) {
+export default function Home (props: UserProps) {
   let posts = props.posts?.map(p => <Summary users={props.users} post={p} />)
   let newPostUrl = '/p'
 
@@ -19,10 +20,7 @@ export default function Home (props: HomeProps) {
     <section>
       <Header />
 
-      <form action={newPostUrl} method="post">
-        <textarea name="content" />
-        <input type="submit" value="Post" />
-      </form>
+      <h1>{props.user}</h1>
 
       { posts }
     </section>
