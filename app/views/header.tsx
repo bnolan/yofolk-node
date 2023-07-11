@@ -5,12 +5,17 @@ declare module 'preact/src/jsx' {
       // available html-tags.
       interface IntrinsicElements {
           'x-icon': unknown;
+          'x-meta': unknown;
           'x-sign-in': unknown;
       }
   }
 }
 
-export function Header () {
+interface HeaderProps {
+  minimal? : boolean
+}
+
+export function Header (props: HeaderProps) {
   return (
     <header>
       <div class='logo'>
@@ -22,11 +27,11 @@ export function Header () {
         {' '}<a href="https://app.uniswap.org/#/tokens/polygon/0xe05fba9fb4796dedf2e81e6f85f11d0fd6f1ade0">$FOLK</a>
       </p>
 
-    <p>
+    { props.minimal || <p>
       <small>Simple social network with ethereum identities</small>
-    </p>
+    </p> }
 
-    <x-sign-in />
+    { props.minimal || <x-sign-in /> }
 
     </header>
 

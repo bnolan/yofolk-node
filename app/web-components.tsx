@@ -47,6 +47,41 @@ class XIcon extends Component {
 
 register(XIcon);
 
+const credentials = 'include'
+
+const method = async (e: Event) => {
+  e.preventDefault()
+
+  // @ts-ignore
+  let url = e.target.href
+  
+  await fetch(url, { method: 'delete', credentials })
+
+  location.reload()
+}
+
+class XMeta extends Component {
+  // Register as <x-greeting>:
+  static tagName = 'x-meta';
+
+  // Track these attributes:
+  static observedAttributes = ['name'];
+
+  render(props) {
+    let { url, moderator, author } = props
+
+    let actions = []
+
+    if (account.value == moderator || account.value == author) {
+      actions.push(<a onClick={method} href={url}>Delete</a>)
+    }
+
+    return <small class='x-meta'>{props.children} {actions}</small>
+  }
+}
+
+register(XMeta);
+
 const ACCOUNT_KEY = 'account'
 
 async function fetchAccount () {
@@ -263,8 +298,6 @@ const SignedIn = (props: { wallet: string }) => {
 }
 
 async function ethRequest(request) {
-  console.log(request)
-
   let r
 
   if (ethereum) {
