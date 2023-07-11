@@ -20,12 +20,14 @@ interface CommentProps {
   users: UserCache
   comment: CommentRecord
   postId: string
+  postAuthor: string
 }
 
 export function Comment (props: CommentProps) {
-  let { users, postId, comment } = props
+  let { users, postId, postAuthor, comment } = props
   
-  let url = `/p/${postId}#${comment.id}`
+  let anchor = `/p/${postId}#${comment.id}`
+  let url = `/p/${postId}/c/${comment.id}`
 
   if (!comment.author) {
     // fixme - not sure why this is happening (bad query?)
@@ -34,8 +36,9 @@ export function Comment (props: CommentProps) {
  
   return (
     <div class='comment'>
-      <x-icon wallet={comment.author} />
-      <small class='meta'><a href={url}><Author author={comment.author} users={users} /></a></small>
+      <x-icon id={comment.id} />
+      <a href={anchor}><Author author={comment.author} users={users} /></a>
+      <x-meta url={url} author={comment.author} moderator={postAuthor}></x-meta>
       <Format value={comment.comment} />
     </div>
   )
@@ -87,7 +90,7 @@ const Embeds = (props: ValueProps): any => {
 export default function Post (props: PostProps) {
   let { users, post } = props
 
-  let comments = post.comments?.map(c => <Comment postId={post.id} users={users} comment={c} />)
+  let comments = post.comments?.map(c => <Comment postAuthor={post.author} postId={post.id} users={users} comment={c} />)
 
   let newCommentUrl = `/p/${post.id}/c`
   let url = `/p/${post.id}`
@@ -98,7 +101,8 @@ export default function Post (props: PostProps) {
 
       <div class='post view'>
         <x-icon wallet={post.author} />
-        <small class='meta'><a href={url}><Author author={post.author} users={users} /></a></small>
+        <a href={url}><Author author={post.author} users={users} /></a>
+        <x-meta url={url} author={post.author} moderator={post.author}></x-meta>
         <time>{ post.created_at }</time>
         <Format value={post.content} />
         <Embeds value={post.content} />

@@ -154,3 +154,35 @@ export const createPost = (user: Wallet, postContent: string) => {
       ($1, $2, now(), now());
   `, [user, postContent])
 }
+
+export const deletePost = async (user: Wallet, post: UUID) => {
+  await pool.query(`
+    DELETE FROM 
+      comments
+    WHERE
+      commentable_id=$2 AND (select true from posts p where p.id=$2 and p.user_address=$1)
+  `, [user, post])
+
+  await pool.query(`
+    DELETE FROM 
+      posts
+    WHERE
+      user_address=$1 AND id=$2;
+  `, [user, post])
+}
+
+export const deleteComment = (user: Wallet, post: UUID, comment: UUID) => {
+  return pool.query(`
+    DELETE FROM 
+      comments
+    WHERE
+        id=$3 
+      and 
+        commentable_id=$2 
+      and (
+        (select true from posts p where p.id=$2 and p.user_address=$1) or user_address=$1
+      )
+  `, [user, post, comment])
+}
+
+

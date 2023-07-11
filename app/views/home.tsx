@@ -5,7 +5,6 @@ import { PostRecord } from './post'
 
 export type UserCache = Record<string, string>
 
-
 interface HomeProps {
   users: UserCache
   posts: Array<PostRecord>

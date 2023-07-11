@@ -1,4 +1,4 @@
-import { getPosts, getSummary, getPostsByUser, createComment, getPostById, createPost, getUsers } from './posts'
+import { getPosts, getSummary, getPostsByUser, createComment, getPostById, createPost, getUsers, deleteComment, deletePost } from './posts'
 import * as bodyParser from 'body-parser'
 import * as express from 'express'
 import { render } from 'preact-render-to-string';
@@ -8,6 +8,7 @@ import { ethers } from 'ethers'
 import Home from '../app/views/home'
 import Post from '../app/views/post'
 import User from '../app/views/user'
+import NotFound from '../app/views/not-found'
 
 const app = express();
 const port = process.env.PORT || 3000
@@ -101,29 +102,43 @@ app.post('/p', auth, async (req: AuthenticatedRequest, res) => {
   let r = await createPost(req.user, req.body.content.toString())
   res.redirect('/')
 })
+app.delete('/p/:id', auth, async (req: AuthenticatedRequest, res) => {
+  let id = req.params.id.toString()
+  await deletePost(req.user, id)
+  res.type('text/plain').send('Post and comments deleted')
+})
+
 app.get('/p/summary', async (req, res) => {
   let summary = await getSummary(users)
   res.type('text/plain').send(summary)
 })
 app.get('/p/:id', async (req, res) => {
   let results = await getPostById(req.params.id.toString())
-  res.status(200).send(page(<Post users={users} post={results.rows[0]} />));
+
+  if (results.rowCount > 0) {
+    res.status(200).send(page(<Post users={users} post={results.rows[0]} />));
+  } else {
+    res.status(404).send(page(<NotFound />));
+  }
 })
 app.post('/p/:id/c', auth, async (req: AuthenticatedRequest, res) => {
   let id = req.params.id.toString()
   let results = await createComment(req.user, id, req.body.comment.toString())
   let path = `/p/${id}`
-  res.redirect(path)
+  res.redirect('back')
 })
+app.delete('/p/:postId/c/:id', auth, async (req: AuthenticatedRequest, res) => {
+  let postId = req.params.postId.toString()
+  let id = req.params.id.toString()
+  await deleteComment(req.user, postId, id)
+  res.type('text/plain').send('Comment deleted')
+})
+
 app.get('/u/:id', async (req, res) => {
   let user = req.params.id.toString() as wallet
   let results = await getPostsByUser(user)
   res.status(200).send(page(<User users={users} user={user} posts={results.rows} />))
 })
-
-// app.post('/users', db.createUser);
-// app.put('/users/:id', db.updateUser);
-// app.delete('/users/:id', db.deleteUser);
 
 app.listen(port, () => {
   console.log(`App running on port ${port}.`);
