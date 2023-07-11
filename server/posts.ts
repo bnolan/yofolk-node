@@ -96,6 +96,10 @@ export const getPosts = async () => {
       posts p 
     LEFT JOIN
       comments c on commentable_id = p.id
+    LEFT JOIN
+      users u on u.eth_address = p.user_address 
+    WHERE
+      u.public is true
     GROUP BY
       p.id
     ORDER BY 
@@ -111,8 +115,10 @@ export const getPostsByUser = async (user: Wallet) => {
       posts p 
     LEFT JOIN
       comments c on commentable_id = p.id
+    LEFT JOIN
+      users u on u.eth_address = p.user_address 
     WHERE
-      p.user_address = $1
+      p.user_address = $1 and u.public is true
     GROUP BY
       p.id
     ORDER BY 
@@ -128,8 +134,10 @@ export const getPostById = (id: string) => {
       posts p 
     LEFT JOIN
       comments c on commentable_id = p.id
-    WHERE 
-      p.id = $1
+    LEFT JOIN
+      users u on u.eth_address = p.user_address 
+    WHERE
+      p.id = $1 and u.public is true
     GROUP BY
       p.id
   `, [id])
