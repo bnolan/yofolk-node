@@ -77,6 +77,13 @@ const Format = (props : ValueProps) => {
   return <cite class='content'>{props.value.split("\n").map((str, key) => <div key={key}><Linkify value={str} /></div>)}</cite>
 }
 
+const Embeds = (props: ValueProps): any => {
+  const re = new RegExp('https://(www.voxels.com/parcels/\\d+)', 'g')
+  const matches = Array.from(props.value.matchAll(re))
+
+  return matches.length > 0 ? <ul>{matches.map(m => <iframe class='voxels-embed' src={m[0]} />)}</ul> : null
+}
+
 export default function Post (props: PostProps) {
   let { users, post } = props
 
@@ -94,6 +101,7 @@ export default function Post (props: PostProps) {
         <small class='meta'><a href={url}><Author author={post.author} users={users} /></a></small>
         <time>{ post.created_at }</time>
         <Format value={post.content} />
+        <Embeds value={post.content} />
 
         <div class='comments'>
           { comments }

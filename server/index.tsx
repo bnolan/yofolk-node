@@ -103,7 +103,7 @@ app.post('/p', auth, async (req: AuthenticatedRequest, res) => {
 })
 app.get('/p/summary', async (req, res) => {
   let summary = await getSummary(users)
-  res.type('text/plain').send(summary) // setHeader('content-type', 'text/plain');
+  res.type('text/plain').send(summary)
 })
 app.get('/p/:id', async (req, res) => {
   let results = await getPostById(req.params.id.toString())
