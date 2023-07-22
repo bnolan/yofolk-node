@@ -5,6 +5,7 @@ declare module 'preact/src/jsx' {
       // available html-tags.
       interface IntrinsicElements {
           'x-icon': unknown;
+          'x-read': unknown;
           'x-meta': unknown;
           'x-sign-in': unknown;
       }

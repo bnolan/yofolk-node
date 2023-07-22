@@ -14,6 +14,7 @@ export default function Home (props: HomeProps) {
   let posts = props.posts?.map(p => <Summary users={props.users} post={p} />)
   let newPostUrl = '/p'
 
+
   return (
     <section>
       <Header />
@@ -22,6 +23,10 @@ export default function Home (props: HomeProps) {
         <textarea name="content" />
         <input type="submit" value="Post" />
       </form>
+
+      <div>
+        <x-read title='todays summary (provided by ChatGPT)' url="/p/summary" />
+      </div>
 
       { posts }
     </section>

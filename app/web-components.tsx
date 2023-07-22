@@ -47,6 +47,45 @@ class XIcon extends Component {
 
 register(XIcon);
 
+const voices = []
+
+if (window.speechSynthesis) {
+  window.speechSynthesis.onvoiceschanged = () => {
+    voices.push(...window.speechSynthesis.getVoices())
+  }
+}
+
+class XRead extends Component {
+  static tagName = 'x-read';
+  static observedAttributes = ['url', 'title'];
+
+  render(props) {
+    let { url, title } = props
+
+    let content = `yolo - ${url}`
+
+    let play = async () => {
+      const message = new SpeechSynthesisUtterance();
+
+      let f = await fetch(url)
+      let j = await f.json()
+
+      message.text = j.content
+      message.voice = voices.find(v => v.name.match(/superstar/i)) || voices[0]
+      message.volume = 0.8
+      message.pitch = 0.9
+      message.rate = 0.78
+      
+      // Speak the text
+      speechSynthesis.speak(message);
+    }
+
+    return <small class='x-read'><button onClick={play}>&#9658;</button> Play {title}</small>
+  }
+}
+
+register(XRead);
+
 const credentials = 'include'
 
 const method = async (e: Event) => {
