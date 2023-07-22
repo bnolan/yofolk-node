@@ -24,7 +24,9 @@ export default function Home (props: HomeProps) {
         <input type="submit" value="Post" />
       </form>
 
-      <x-read title='todays summary (provided by ChatGPT)' url="/p/summary" />
+      <div>
+        <x-read title='todays summary (provided by ChatGPT)' url="/p/summary" />
+      </div>
 
       { posts }
     </section>

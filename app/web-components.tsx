@@ -48,10 +48,11 @@ class XIcon extends Component {
 register(XIcon);
 
 const voices = []
-window.speechSynthesis.onvoiceschanged = () => {
-  voices.push(...window.speechSynthesis.getVoices())
 
-  console.log(voices.map(v => v.name))
+if (window.speechSynthesis) {
+  window.speechSynthesis.onvoiceschanged = () => {
+    voices.push(...window.speechSynthesis.getVoices())
+  }
 }
 
 class XRead extends Component {
