@@ -47,12 +47,16 @@ class XIcon extends Component {
 
 register(XIcon);
 
-const voices = []
+let voices = []
 
 if (window.speechSynthesis) {
+  voices.push(...window.speechSynthesis.getVoices())
+
   window.speechSynthesis.onvoiceschanged = () => {
-    voices.push(...window.speechSynthesis.getVoices())
+    voices = window.speechSynthesis.getVoices()
   }
+} else {
+  alert('wut')
 }
 
 class XRead extends Component {
@@ -73,7 +77,7 @@ class XRead extends Component {
       message.text = j.content
       message.voice = voices.find(v => v.name.match(/superstar/i)) || voices[0]
       message.volume = 0.8
-      message.pitch = 0.9
+      message.pitch = 0.4
       message.rate = 0.78
       
       // Speak the text
