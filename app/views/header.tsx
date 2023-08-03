@@ -24,8 +24,7 @@ export function Header (props: HeaderProps) {
       </div>
 
       <p>
-        {' '}<a href="https://github.com/bnolan/yofolk-node">Github</a> |
-        {' '}<a href="https://app.uniswap.org/#/tokens/polygon/0xe05fba9fb4796dedf2e81e6f85f11d0fd6f1ade0">$FOLK</a>
+        {' '}<a href="https://github.com/bnolan/yofolk-node">Github</a>
       </p>
 
     { props.minimal || <p>
