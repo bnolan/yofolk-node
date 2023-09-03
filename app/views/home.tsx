@@ -1,34 +1,31 @@
-import { Author } from '../components/author';
-import Summary from '../components/summary';
 import { Header } from './header'
-import { PostRecord } from './post'
-
-export type UserCache = Record<string, string>
 
 interface HomeProps {
-  users: UserCache
-  posts: Array<PostRecord>
 }
 
 export default function Home (props: HomeProps) {
-  let posts = props.posts?.map(p => <Summary users={props.users} post={p} />)
-  let newPostUrl = '/p'
-
-
   return (
     <section>
-      <Header />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
 
-      <form action={newPostUrl} method="post">
-        <textarea name="content" />
-        <input type="submit" value="Post" />
-      </form>
+      <h3>
+        Yofolk is paused
+      </h3>
 
-      <div>
-        <x-read title='todays summary (provided by ChatGPT)' url="/p/summary" />
-      </div>
+      <p>
+        Yofolk was an experiment in decentralized social networking using
+        ethereum identities. It has been superceded by technologies
+        like nostr, mastodon, lemmy and friendica, and has been put on
+        pause.
+      </p>
 
-      { posts }
+      <p>
+        ben @ voxels
+      </p>
     </section>
   )
 }
